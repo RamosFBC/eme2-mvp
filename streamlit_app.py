@@ -41,19 +41,6 @@ def start_editing_question(index):
     st.session_state["editing_quest"] = True
 
 
-def start_editing_alternative(index):
-    st.session_state["edit_alt_index"] = index
-    st.session_state["editing_alt"] = True
-
-
-def stop_editing_alt():
-    st.session_state["editing_alt"] = False
-
-
-def stop_editing_quest():
-    st.session_state["editing_quest"] = False
-
-
 def generate_pdf(questions):
     buffer = BytesIO()
     fileName = "prova.pdf"
@@ -100,7 +87,7 @@ def main():
     st.title("Criação de :blue[Provas] 📄🖊️")
     st.write("\n\n\n\n\n\n\n\n\n")
     if not st.session_state["generating_test"]:
-        if st.button("Gerar Prova", key="generate_test_button"):
+        if st.button("Construir Prova", key="generate_test_button"):
             st.session_state["generating_test"] = True
             st.rerun()
             st.write("\n\n\n\n\n\n\n\n\n")
@@ -114,26 +101,39 @@ def main():
                     placeholder="Digite sua pergunta aqui",
                 )
                 alternativas = []
+                col1, col2 = st.columns([10, 8])
+                with col2:
+                    st.write("Marque ✅ 1 ou + alternativas corretas ↓")
                 for i in range(st.session_state["quest_num_alts"]):
-                    st.write(f"Alternativa {i + 1}:")
-                    alternative_text = st.text_input(
-                        f"{letter_alternatives[i]})",
-                        placeholder="Digite uma alternativa aqui",
-                        key=f"new_alt_{i}",
-                    )
+                    col1, col2, col3 = st.columns([1, 20, 1])
+                    with col1:
+                        st.write(f"\n")
+                        st.write(f"\n")
 
-                    is_true = st.checkbox(
-                        "Alternativa correta?",
-                        key=f"new_is_true_{i}",
-                        value=False,
-                    )
-                    alternativas.append(
-                        {
-                            "text": alternative_text,
-                            "is_true": is_true,
-                            "explanation": "",
-                        }
-                    )
+                        st.write(f"{letter_alternatives[i]})")
+                    with col2:
+                        alternative_text = st.text_area(
+                            "",
+                            placeholder="Digite uma alternativa aqui",
+                            key=f"new_alt_{i}",
+                            height=80,
+                        )
+                    with col3:
+                        st.write(f"\n")
+                        st.write(f"\n")
+                        is_true = st.checkbox(
+                            "",
+                            key=f"new_is_true_{i}",
+                            value=False,
+                        )
+                        alternativas.append(
+                            {
+                                "text": alternative_text,
+                                "is_true": is_true,
+                                "explanation": "",
+                            }
+                        )
+                st.write("\n")
 
                 col1, col2 = st.columns([3, 1])
                 with col1:
@@ -173,62 +173,99 @@ def main():
 
         if not st.session_state["editing_quest"]:
             # Exibe questões salvas abaixo do formulário
-            st.write("### Questões Salvas:")
-            if st.session_state.questions:
-                for idx, question in enumerate(st.session_state.questions):
-                    st.write(f"**{idx + 1}**. {question['enunciate']}")
-                    for alt_idx, alt in enumerate(question["alternatives"]):
-                        status = "(Correta)" if alt["is_true"] else "(Incorreta)"
-                        st.write(
-                            f"    {letter_alternatives[alt_idx]}) {alt['text']} {status}"
-                        )
-                        st.write(f"Explicação: {alt['explanation']}")
-                        st.write(f"\n")
-                    st.button(
-                        "Editar",
-                        key=f"edit_quest_button_{idx}",
-                        on_click=lambda idx=idx: start_editing_question(idx),
-                    )
-                    st.write("---")  # Adiciona um delimitador entre perguntas
-            else:
-                st.write("Nenhuma pergunta adicionada ainda.")
+            with st.expander("### Questões Salvas", expanded=True):
+                st.write("### Questões:")
+                if st.session_state.questions:
+                    for idx, question in enumerate(st.session_state.questions):
+                        st.write(f"#### Questão {idx + 1}.")
+                        st.write(f"{question['enunciate']}")
+                        for alt_idx, alt in enumerate(question["alternatives"]):
+                            status = "✅" if alt["is_true"] else ""
+                            st.write(
+                                f"{status} {letter_alternatives[alt_idx]}) {alt['text']}"
+                            )
+                            st.write(f"Explicação: {alt['explanation']}")
+                            st.write(f"\n")
+                        col1, col2 = st.columns([1, 7])
+                        with col1:
+                            st.button(
+                                "Editar",
+                                key=f"edit_quest_button_{idx}",
+                                on_click=lambda idx=idx: start_editing_question(idx),
+                            )
+                        with col2:
+                            st.button(
+                                "Excluir",
+                                key=f"delete_quest_button_{idx}",
+                                on_click=lambda idx=idx: st.session_state.questions.pop(
+                                    idx
+                                ),
+                            )
+                        st.write("---")  # Adiciona um delimitador entre perguntas
+                else:
+                    st.write("Nenhuma pergunta adicionada ainda.")
 
         if st.session_state["editing_quest"] == True:
-            st.write("### Editar Questão:")
-            question = st.session_state.questions[st.session_state["edit_quest_index"]]
-            enunciate = st.text_area(
-                "Edite o enunciado da questão:", value=question["enunciate"]
-            )
-            for idx, alt in enumerate(question["alternatives"]):
-                alt_text = st.text_area(
-                    f"{letter_alternatives[idx]}:",
-                    value=alt["text"],
+            with st.form(key="edit_question_form"):
+                st.write("### Editar Questão:")
+                question = st.session_state.questions[
+                    st.session_state["edit_quest_index"]
+                ]
+                enunciate = st.text_area(
+                    "Edite o enunciado da questão:", value=question["enunciate"]
                 )
-                is_true = st.checkbox(
-                    "Alternativa correta?", value=alt["is_true"], key=idx
-                )
-                explanation_text = st.text_input(
-                    f"Edite a explicação da alternativa {letter_alternatives[idx]}:",
-                    value=alt["explanation"],
-                    key=f"exp_{idx}",
-                )
-                st.write("---")
-                st.write("\n")
-                question["alternatives"][idx] = {
-                    "text": alt_text,
-                    "is_true": is_true,
-                    "explanation": explanation_text,
-                }
-            col1, col2 = st.columns([1, 8])
-            with col1:
-                if st.button("Salvar", key="save_button", on_click=stop_editing_quest):
-                    st.success("Questão editada com sucesso")
-                    st.session_state["editing_quest"] = False
-            with col2:
-                if st.button("Cancelar", key="cancel_button"):
-                    st.warning("Edição cancelada")
-                    st.session_state["editing_quest"] = False
-                    st.rerun()
+                alternatives = []
+                for idx, alt in enumerate(question["alternatives"]):
+                    col1, col2, col3 = st.columns([1, 20, 1])
+                    with col1:
+                        st.write(f"\n")
+                        st.write(f"\n")
+                        st.write(f"{letter_alternatives[idx]})")
+                    with col2:
+                        alternative_text = st.text_area(
+                            "",
+                            value=f"{alt['text']}",
+                            key=f"edit_alt_{idx}",
+                        )
+                        question["alternatives"][idx]["text"] = alternative_text
+                    with col3:
+                        st.write(f"\n")
+                        st.write(f"\n")
+                        is_true = st.checkbox(
+                            "",
+                            key=f"edit_is_true_{idx}",
+                            value=alt["is_true"],
+                        )
+                    explanation_text = st.text_area(
+                        f"Explicação",
+                        value=alt["explanation"],
+                        key=f"edit_exp_{idx}",
+                    )
+                    st.write("\n")
+                    alternatives.append(
+                        {
+                            "text": alternative_text,
+                            "is_true": is_true,
+                            "explanation": explanation_text,
+                        }
+                    )
+                col1, col2 = st.columns([1, 7])
+                with col1:
+                    if st.form_submit_button("Salvar"):
+                        st.session_state.questions[
+                            st.session_state["edit_quest_index"]
+                        ] = {
+                            "enunciate": enunciate,
+                            "alternatives": alternatives,
+                        }
+                        st.success("Questão editada com sucesso")
+                        st.session_state["editing_quest"] = False
+                        st.rerun()
+                with col2:
+                    if st.form_submit_button("Cancelar"):
+                        st.warning("Edição cancelada")
+                        st.session_state["editing_quest"] = False
+                        st.rerun()
 
         if st.button("Gerar Prova", key="genereta_bottom_button"):
             st.success("Prova gerada com sucesso!")
