@@ -102,29 +102,30 @@ def main():
                 )
                 alternativas = []
                 col1, col2 = st.columns([10, 8])
-                with col2:
-                    st.write("Marque ✅ 1 ou + alternativas corretas ↓")
+                with col1:
+                    st.write("↓ Marque ✅ 1 ou + alternativas corretas")
                 for i in range(st.session_state["quest_num_alts"]):
-                    col1, col2, col3 = st.columns([1, 20, 1])
+                    col1, col2, col3 = st.columns([1, 1, 20])
                     with col1:
-                        st.write(f"\n")
-                        st.write(f"\n")
-
-                        st.write(f"{letter_alternatives[i]})")
-                    with col2:
-                        alternative_text = st.text_area(
-                            "",
-                            placeholder="Digite uma alternativa aqui",
-                            key=f"new_alt_{i}",
-                            height=80,
-                        )
-                    with col3:
                         st.write(f"\n")
                         st.write(f"\n")
                         is_true = st.checkbox(
                             "",
                             key=f"new_is_true_{i}",
                             value=False,
+                        )
+                    with col2:
+                        st.write(f"\n")
+                        st.write(f"\n")
+                        st.write(f"\n")
+
+                        st.write(f"{letter_alternatives[i]})")
+                    with col3:
+                        alternative_text = st.text_area(
+                            "",
+                            placeholder="Digite uma alternativa aqui",
+                            key=f"new_alt_{i}",
+                            height=80,
                         )
                         alternativas.append(
                             {
@@ -133,6 +134,7 @@ def main():
                                 "explanation": "",
                             }
                         )
+                    st.write("---")
                 st.write("\n")
 
                 col1, col2 = st.columns([3, 1])
@@ -220,6 +222,7 @@ def main():
                     with col1:
                         st.write(f"\n")
                         st.write(f"\n")
+                        st.write(f"\n")
                         st.write(f"{letter_alternatives[idx]})")
                     with col2:
                         alternative_text = st.text_area(
@@ -268,10 +271,9 @@ def main():
                         st.rerun()
 
         if st.button("Gerar Prova", key="genereta_bottom_button"):
-            st.success("Prova gerada com sucesso!")
             if st.session_state.questions:
                 pdf_buffer = generate_pdf(st.session_state.questions)
-                st.success("Prova gerada com sucesso! Arquivo salvo como 'prova.pdf'.")
+                st.success("Prova gerada com sucesso! Baixe o arquivo abaixo:")
                 st.download_button(
                     label="Download PDF",
                     data=pdf_buffer,
