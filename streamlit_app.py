@@ -5,8 +5,8 @@ from reportlab.lib import colors
 from io import BytesIO
 
 # Inicializa o estado da sessão para armazenar perguntas e alternativas
-if "generating_test" not in st.session_state:
-    st.session_state["generating_test"] = False
+if "manual_creation" not in st.session_state:
+    st.session_state["manual_creation"] = False
 if "questions" not in st.session_state:
     st.session_state["questions"] = []
 if "current_alternatives" not in st.session_state:
@@ -88,11 +88,11 @@ def generate_pdf(questions):
 def main():
     st.title("Criação de :blue[Provas] 📄🖊️")
     st.write("\n\n\n\n\n\n\n\n\n")
-    if not st.session_state["generating_test"]:
+    if not st.session_state["manual_creation"]:
         col1, col2 = st.columns([1, 4])
         with col1:
             if st.button("Construir Prova", key="generate_test_button"):
-                st.session_state["generating_test"] = True
+                st.session_state["manual_creation"] = True
                 st.rerun()
                 st.write("\n\n\n\n\n\n\n\n\n")
         with col2:
@@ -179,7 +179,7 @@ def main():
                     st.rerun()
             with col3:
                 if st.button("Voltar", key="cancel_button"):
-                    st.session_state["generating_test"] = False
+                    st.session_state["manual_creation"] = False
                     st.rerun()
         if st.session_state["adding_question"] == True:
             num_alt = st.number_input(
@@ -300,7 +300,7 @@ def main():
                     file_name="prova.pdf",
                     mime="application/pdf",
                 )
-                st.session_state["generating_test"] = False
+                st.session_state["manual_creation"] = False
             else:
                 st.warning("Nenhuma pergunta disponível para gerar a prova.")
 
