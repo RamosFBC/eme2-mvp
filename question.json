@@ -1,0 +1,30 @@
+{
+    "enunciate": "A hipercalemia é uma condição clínica caracterizada por níveis elevados de potássio no sangue, que pode levar a uma série de complicações. Qual das alternativas a seguir é uma possível causa de hipercalemia?",
+    "alternatives": [
+        {
+            "text": "Aumento da ingestão de alimentos ricos em sódio.",
+            "is_true": false,
+            "explanation": "O sódio, não o potássio, é o elemento que é ingerido em excesso quando há aumento da ingestão de alimentos salgados. Embora ambos sejam eletrólitos, eles são metabolizados de formas diferentes pelo organismo."
+        },
+        {
+            "text": "Uso de diuréticos poupadores de potássio.",
+            "is_true": true,
+            "explanation": "Diuréticos poupadores de potássio, como a espironolactona, diminuem a excreção renal de potássio, o que pode levar à hipercalemia."
+        },
+        {
+            "text": "Hiperatividade da glândula adrenal.",
+            "is_true": false,
+            "explanation": "A hiperatividade da glândula adrenal, como na doença de Cushing, geralmente está associada a níveis baixos de potássio, não a hipercalemia."
+        },
+        {
+            "text": "Aumento do débito urinário.",
+            "is_true": false,
+            "explanation": "Um aumento no débito urinário geralmente está associado à perda de potássio, o que poderia causar hipocalemia, não hipercalemia."
+        },
+        {
+            "text": "Ingestão excessiva de cálcio.",
+            "is_true": false,
+            "explanation": "O excesso de cálcio na dieta afeta o equilíbrio de cálcio no corpo, não diretamente o de potássio, e não é uma causa comum de hipercalemia."
+        }
+    ]
+}

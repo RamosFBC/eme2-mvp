@@ -23,6 +23,8 @@ if "adding_question" not in st.session_state:
     st.session_state["adding_question"] = False
 if "quest_num_alts" not in st.session_state:
     st.session_state["quest_num_alts"] = 0
+if "show_explanations" not in st.session_state:
+    st.session_state["show_explanations"] = False
 
 letter_alternatives = ["A", "B", "C", "D", "E"]
 
@@ -87,10 +89,16 @@ def main():
     st.title("Criação de :blue[Provas] 📄🖊️")
     st.write("\n\n\n\n\n\n\n\n\n")
     if not st.session_state["generating_test"]:
-        if st.button("Construir Prova", key="generate_test_button"):
-            st.session_state["generating_test"] = True
-            st.rerun()
-            st.write("\n\n\n\n\n\n\n\n\n")
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            if st.button("Construir Prova", key="generate_test_button"):
+                st.session_state["generating_test"] = True
+                st.rerun()
+                st.write("\n\n\n\n\n\n\n\n\n")
+        with col2:
+            if st.button("Gerar Prova com IA", key="about_button"):
+                st.rerun()
+
     else:
         if st.session_state["quest_num_alts"] != 0:
             # Campos de entrada para a pergunta e alternativas
@@ -161,9 +169,18 @@ def main():
                         st.warning("Questão descartada.")
 
         else:
-            if st.button("Criar Questão", key="create_question_button"):
-                st.session_state["adding_question"] = True
-                st.rerun()
+            col1, col2, col3 = st.columns([5, 18, 4])
+            with col1:
+                if st.button("Criar Questão", key="create_question_button"):
+                    st.session_state["adding_question"] = True
+                    st.rerun()
+            with col2:
+                if st.button("Gerar Questão com IA", key="ia_question_button"):
+                    st.rerun()
+            with col3:
+                if st.button("Voltar", key="cancel_button"):
+                    st.session_state["generating_test"] = False
+                    st.rerun()
         if st.session_state["adding_question"] == True:
             num_alt = st.number_input(
                 "Quantas alternativas a questão terá?", min_value=2, value=2
@@ -175,18 +192,22 @@ def main():
 
         if not st.session_state["editing_quest"]:
             # Exibe questões salvas abaixo do formulário
-            with st.expander("### Questões Salvas", expanded=True):
-                st.write("### Questões:")
+            with st.expander("Questões Salvas", expanded=True):
+                ## Toggle button to show/hide explanations
                 if st.session_state.questions:
+                    show_explanations = st.checkbox(
+                        "Mostrar explicações", value=st.session_state.show_explanations
+                    )
                     for idx, question in enumerate(st.session_state.questions):
-                        st.write(f"#### Questão {idx + 1}.")
+                        st.write(f"### Questão {idx + 1}")
                         st.write(f"{question['enunciate']}")
                         for alt_idx, alt in enumerate(question["alternatives"]):
                             status = "✅" if alt["is_true"] else ""
                             st.write(
-                                f"{status} {letter_alternatives[alt_idx]}) {alt['text']}"
+                                f"{status} {letter_alternatives[alt_idx]}) {alt['text']}",
                             )
-                            st.write(f"Explicação: {alt['explanation']}")
+                            if show_explanations:
+                                st.write(f"**Explicação:** {alt['explanation']}")
                             st.write(f"\n")
                         col1, col2 = st.columns([1, 7])
                         with col1:
@@ -209,29 +230,16 @@ def main():
 
         if st.session_state["editing_quest"] == True:
             with st.form(key="edit_question_form"):
-                st.write("### Editar Questão:")
-                question = st.session_state.questions[
-                    st.session_state["edit_quest_index"]
-                ]
+                question_index = st.session_state["edit_quest_index"]
+                st.write(f"### Editar Questão {question_index + 1}:")
+                question = st.session_state.questions[question_index]
                 enunciate = st.text_area(
                     "Edite o enunciado da questão:", value=question["enunciate"]
                 )
                 alternatives = []
                 for idx, alt in enumerate(question["alternatives"]):
-                    col1, col2, col3 = st.columns([1, 20, 1])
+                    col1, col2, col3 = st.columns([1, 1, 20])
                     with col1:
-                        st.write(f"\n")
-                        st.write(f"\n")
-                        st.write(f"\n")
-                        st.write(f"{letter_alternatives[idx]})")
-                    with col2:
-                        alternative_text = st.text_area(
-                            "",
-                            value=f"{alt['text']}",
-                            key=f"edit_alt_{idx}",
-                        )
-                        question["alternatives"][idx]["text"] = alternative_text
-                    with col3:
                         st.write(f"\n")
                         st.write(f"\n")
                         is_true = st.checkbox(
@@ -239,6 +247,18 @@ def main():
                             key=f"edit_is_true_{idx}",
                             value=alt["is_true"],
                         )
+                    with col2:
+                        st.write(f"\n")
+                        st.write(f"\n")
+                        st.write(f"\n")
+                        st.write(f"{letter_alternatives[idx]})")
+                    with col3:
+                        alternative_text = st.text_area(
+                            "",
+                            value=f"{alt['text']}",
+                            key=f"edit_alt_{idx}",
+                        )
+                        question["alternatives"][idx]["text"] = alternative_text
                     explanation_text = st.text_area(
                         f"Explicação",
                         value=alt["explanation"],
